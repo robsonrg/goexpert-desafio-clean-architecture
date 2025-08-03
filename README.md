@@ -36,6 +36,8 @@ go run main.go
 
 ### Web server
 
+> Teste usando o plugin REST Client, do VS Code, com os arquivos em `/api` ou via cURL: 
+
 1. Criando um pedido
 
 ```sh

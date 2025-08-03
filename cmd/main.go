@@ -52,8 +52,8 @@ func main() {
 	listOrderUseCase := setupListOrderUseCase(db)
 
 	startWebServer(configs.WebServerPort, createOrderUseCase, listOrderUseCase)
-	// startGRPCServer(configs.GRPCServerPort, *createOrderUseCase, *listOrderUseCase)
-	// startGraphQLServer(configs.GraphQLServerPort, *createOrderUseCase, *listOrderUseCase)
+	startGRPCServer(configs.GRPCServerPort, *createOrderUseCase, *listOrderUseCase)
+	startGraphQLServer(configs.GraphQLServerPort, *createOrderUseCase, *listOrderUseCase)
 }
 
 func getRabbitMQChannel() *amqp.Channel {

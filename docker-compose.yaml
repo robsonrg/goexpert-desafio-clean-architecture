@@ -10,7 +10,8 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - .docker/mysql:/var/lib/mysql
+      - ./.docker/mysql:/var/lib/mysql
+      - ./migrations:/docker-entrypoint-initdb.d
 
   rabbitmq:
     image: rabbitmq:3-management

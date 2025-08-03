@@ -5,6 +5,10 @@ type Order {
     FinalPrice: Float!
 }
 
+type Query {
+    listOrders: [Order!]!
+}
+
 input OrderInput {
     id : String!
     Price: Float!

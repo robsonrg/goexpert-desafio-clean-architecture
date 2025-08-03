@@ -1,8 +1,8 @@
-package usecase
+package orders
 
 import (
-	"github.com/devfullcycle/20-CleanArch/internal/entity"
-	"github.com/devfullcycle/20-CleanArch/pkg/events"
+	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/entity"
+	"github.com/robsonrg/goexpert-desafio-clean-architecture/pkg/events"
 )
 
 type OrderInputDTO struct {
@@ -43,7 +43,7 @@ func (c *CreateOrderUseCase) Execute(input OrderInputDTO) (OrderOutputDTO, error
 		Tax:   input.Tax,
 	}
 	order.CalculateFinalPrice()
-	if err := c.OrderRepository.Save(&order); err != nil {
+	if err := c.OrderRepository.CreateOrder(&order); err != nil {
 		return OrderOutputDTO{}, err
 	}
 
@@ -55,7 +55,7 @@ func (c *CreateOrderUseCase) Execute(input OrderInputDTO) (OrderOutputDTO, error
 	}
 
 	c.OrderCreated.SetPayload(dto)
-	c.EventDispatcher.Dispatch(c.OrderCreated)
+	// c.EventDispatcher.Dispatch(c.OrderCreated)
 
 	return dto, nil
 }

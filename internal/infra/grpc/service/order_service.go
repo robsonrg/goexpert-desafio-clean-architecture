@@ -3,23 +3,28 @@ package service
 import (
 	"context"
 
-	"github.com/devfullcycle/20-CleanArch/internal/infra/grpc/pb"
-	"github.com/devfullcycle/20-CleanArch/internal/usecase"
+	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/infra/grpc/pb"
+	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/usecase/orders"
 )
 
 type OrderService struct {
 	pb.UnimplementedOrderServiceServer
-	CreateOrderUseCase usecase.CreateOrderUseCase
+	CreateOrderUseCase orders.CreateOrderUseCase
+	ListOrderUseCase   orders.ListOrderUseCase
 }
 
-func NewOrderService(createOrderUseCase usecase.CreateOrderUseCase) *OrderService {
+func NewOrderService(
+	createOrderUseCase orders.CreateOrderUseCase,
+	listOrderUseCase orders.ListOrderUseCase,
+) *OrderService {
 	return &OrderService{
 		CreateOrderUseCase: createOrderUseCase,
+		ListOrderUseCase:   listOrderUseCase,
 	}
 }
 
 func (s *OrderService) CreateOrder(ctx context.Context, in *pb.CreateOrderRequest) (*pb.CreateOrderResponse, error) {
-	dto := usecase.OrderInputDTO{
+	dto := orders.OrderInputDTO{
 		ID:    in.Id,
 		Price: float64(in.Price),
 		Tax:   float64(in.Tax),
@@ -34,4 +39,22 @@ func (s *OrderService) CreateOrder(ctx context.Context, in *pb.CreateOrderReques
 		Tax:        float32(output.Tax),
 		FinalPrice: float32(output.FinalPrice),
 	}, nil
+}
+
+func (s *OrderService) ListOrders(ctx context.Context, in *pb.ListOrdersRequest) (*pb.ListOrdersResponse, error) {
+	listOrdersResp, err := s.ListOrderUseCase.GetOrders()
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &pb.ListOrdersResponse{}
+	for _, order := range listOrdersResp.Orders {
+		resp.Orders = append(resp.Orders, &pb.Order{
+			Id:         order.ID,
+			Price:      float32(order.Price),
+			Tax:        float32(order.Tax),
+			FinalPrice: float32(order.FinalPrice),
+		})
+	}
+	return resp, nil
 }

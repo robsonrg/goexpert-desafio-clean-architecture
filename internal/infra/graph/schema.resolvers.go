@@ -7,13 +7,13 @@ package graph
 import (
 	"context"
 
-	"github.com/devfullcycle/20-CleanArch/internal/infra/graph/model"
-	"github.com/devfullcycle/20-CleanArch/internal/usecase"
+	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/infra/graph/model"
+	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/usecase/orders"
 )
 
 // CreateOrder is the resolver for the createOrder field.
 func (r *mutationResolver) CreateOrder(ctx context.Context, input *model.OrderInput) (*model.Order, error) {
-	dto := usecase.OrderInputDTO{
+	dto := orders.OrderInputDTO{
 		ID:    input.ID,
 		Price: float64(input.Price),
 		Tax:   float64(input.Tax),
@@ -30,7 +30,29 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input *model.OrderIn
 	}, nil
 }
 
+// ListOrders is the resolver for the listOrders field.
+func (r *queryResolver) ListOrders(ctx context.Context) ([]*model.Order, error) {
+	list, err := r.ListOrderUseCase.GetOrders()
+	if err != nil {
+		return nil, err
+	}
+	orders := make([]*model.Order, 0)
+	for _, order := range list.Orders {
+		orders = append(orders, &model.Order{
+			ID:         order.ID,
+			Price:      float64(order.Price),
+			Tax:        float64(order.Tax),
+			FinalPrice: float64(order.FinalPrice),
+		})
+	}
+	return orders, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+
 type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

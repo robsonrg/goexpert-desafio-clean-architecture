@@ -9,7 +9,6 @@ require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/spf13/viper v1.14.0
-	github.com/streadway/amqp v1.0.0
 	github.com/vektah/gqlparser/v2 v2.5.1
 	google.golang.org/grpc v1.74.2
 	google.golang.org/protobuf v1.36.6

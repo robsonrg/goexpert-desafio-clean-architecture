@@ -12,16 +12,13 @@ import (
 
 	"github.com/robsonrg/goexpert-desafio-clean-architecture/configs"
 	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/event"
-	event_handler "github.com/robsonrg/goexpert-desafio-clean-architecture/internal/event/handler"
 	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/infra/database"
 	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/infra/graph"
 	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/infra/grpc/pb"
 	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/infra/grpc/service"
 	"github.com/robsonrg/goexpert-desafio-clean-architecture/internal/infra/webserver"
 	usecase "github.com/robsonrg/goexpert-desafio-clean-architecture/internal/usecase/orders"
-	"github.com/robsonrg/goexpert-desafio-clean-architecture/pkg/events"
 
-	"github.com/streadway/amqp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -41,14 +38,7 @@ func main() {
 	}
 	defer db.Close()
 
-	rabbitMQChannel := getRabbitMQChannel()
-
-	eventDispatcher := events.NewEventDispatcher()
-	eventDispatcher.Register("OrderCreated", &event_handler.OrderCreatedHandler{
-		RabbitMQChannel: rabbitMQChannel,
-	})
-
-	createOrderUseCase := setupCreateOrderUseCase(db, eventDispatcher)
+	createOrderUseCase := setupCreateOrderUseCase(db)
 	listOrderUseCase := setupListOrderUseCase(db)
 
 	startWebServer(configs.WebServerPort, createOrderUseCase, listOrderUseCase)
@@ -56,22 +46,10 @@ func main() {
 	startGraphQLServer(configs.GraphQLServerPort, *createOrderUseCase, *listOrderUseCase)
 }
 
-func getRabbitMQChannel() *amqp.Channel {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	if err != nil {
-		panic(err)
-	}
-	ch, err := conn.Channel()
-	if err != nil {
-		panic(err)
-	}
-	return ch
-}
-
-func setupCreateOrderUseCase(db *sql.DB, eventDispatcher *events.EventDispatcher) *usecase.CreateOrderUseCase {
+func setupCreateOrderUseCase(db *sql.DB) *usecase.CreateOrderUseCase {
 	orderRepository := database.NewOrderRepository(db)
 	orderCreated := event.NewOrderCreated()
-	return usecase.NewCreateOrderUseCase(orderRepository, orderCreated, eventDispatcher)
+	return usecase.NewCreateOrderUseCase(orderRepository, orderCreated)
 }
 
 func setupListOrderUseCase(db *sql.DB) *usecase.ListOrderUseCase {
